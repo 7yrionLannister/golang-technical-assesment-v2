@@ -1,0 +1,132 @@
+openapi: 3.1.0
+# TODO: split into multiple files: parameters.yaml, models.yaml, etc
+info:
+  title: Energy Consumption API
+  description: |-
+    Report the energy consumption of a set of electricity meters.
+
+  contact:
+    email: daniel.fernandez3@u.icesi.edu.co
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http:localhost:8081
+tags:
+  - name: consumption
+    description: Operations related to energy consumption.
+paths:
+  /consumption:
+    get:
+      tags:
+        - consumption
+      summary: Get consumption report.
+      description: Returns the energy consumption for each meter for the period between startDate and endDate.
+      operationId: getConsumption
+      parameters: 
+        - name: meter_id
+          in: query
+          description: Meter ids to filter by.
+          explode: true # ?meter_id=1,meter_id=2
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: uint8
+        - name: start_date
+          in: query
+          description: "Start date (format: YYYY-MM-DD)."
+          example: 2017-07-21
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: "End date (format: YYYY-MM-DD)."
+          example: 2026-01-19
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: period
+          in: query
+          description: "Period (any of [monthly, weekly, daily])."
+          example: monthly
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeriodicConsumption'
+        '400':
+          description: Invalid query params
+        '500':
+          description: Internal server error
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - bearer_auth: []
+
+components:
+  schemas:
+    EnergyConsumption:
+      type: object
+      required: 
+        - active
+        - address
+        - meter_id
+      properties:
+        meter_id:
+          type: integer
+          format: uint8
+          examples: [1]
+        address:
+          type: string
+          description: Address where the meter is located
+          examples: ["10880 Malibu Point, Malibu, CA 90265"]
+        active:
+          type: array
+          description: Active energy consumed
+          items:
+            type: number
+            format: float
+    PeriodicConsumption:
+      required:
+        - data_graph
+        - period
+      type: object
+      properties:
+        period:
+          type: string
+          examples: ["June 2023 - July 2023"]
+        data_graph:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnergyConsumption'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
