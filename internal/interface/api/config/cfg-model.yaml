@@ -1,0 +1,6 @@
+package: model
+output: ../../domain/dto/models.gen.go
+output-options:
+  skip-prune: true
+generate:
+  models: true

@@ -11,7 +11,27 @@ import (
 	"net/http"
 
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+const (
+	Bearer_authScopes = "bearer_auth.Scopes"
+)
+
+// GetConsumptionParams defines parameters for GetConsumption.
+type GetConsumptionParams struct {
+	// MeterId Meter ids to filter by.
+	MeterId []uint8 `form:"meter_id" json:"meter_id"`
+
+	// StartDate Start date (format: YYYY-MM-DD).
+	StartDate openapi_types.Date `form:"start_date" json:"start_date"`
+
+	// EndDate End date (format: YYYY-MM-DD).
+	EndDate openapi_types.Date `form:"end_date" json:"end_date"`
+
+	// Period Period (any of [monthly, weekly, daily]).
+	Period string `form:"period" json:"period"`
+}
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {

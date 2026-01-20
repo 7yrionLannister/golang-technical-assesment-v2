@@ -64,7 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PeriodicConsumption'
+                $ref: './models.yaml#/components/schemas/PeriodicConsumption'
         '400':
           description: Invalid query params
         '500':
@@ -74,57 +74,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "./models.yaml#/components/schemas/Error"
       security:
         - bearer_auth: []
 
 components:
-  schemas:
-    EnergyConsumption:
-      type: object
-      required: 
-        - active
-        - address
-        - meter_id
-      properties:
-        meter_id:
-          type: integer
-          format: uint8
-          examples: [1]
-        address:
-          type: string
-          description: Address where the meter is located
-          examples: ["10880 Malibu Point, Malibu, CA 90265"]
-        active:
-          type: array
-          description: Active energy consumed
-          items:
-            type: number
-            format: float
-    PeriodicConsumption:
-      required:
-        - data_graph
-        - period
-      type: object
-      properties:
-        period:
-          type: string
-          examples: ["June 2023 - July 2023"]
-        data_graph:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnergyConsumption'
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-      required:
-        - code
-        - message
-
   securitySchemes:
     bearer_auth:
       type: http
