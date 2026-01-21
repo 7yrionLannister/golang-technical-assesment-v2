@@ -67,10 +67,12 @@ paths:
                 $ref: './models.yaml#/components/schemas/PeriodicConsumption'
         '400':
           description: Invalid query params
+          content:
+            application/json:
+              schema:
+                $ref: "./models.yaml#/components/schemas/Error"
         '500':
           description: Internal server error
-        default:
-          description: Unexpected error
           content:
             application/json:
               schema:

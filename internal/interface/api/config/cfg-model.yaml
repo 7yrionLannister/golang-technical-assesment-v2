@@ -1,4 +1,4 @@
-package: model
+package: dto
 output: ../../domain/dto/models.gen.go
 output-options:
   skip-prune: true

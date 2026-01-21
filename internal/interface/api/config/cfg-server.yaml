@@ -5,5 +5,6 @@ output-options:
 generate:
   models: true
   std-http-server: true
+  strict-server: true
 import-mapping:
-  ./models.yaml: "github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/api/model"
+  ./models.yaml: "github.com/7yrionLannister/golang-technical-assesment-v2/internal/domain/dto"

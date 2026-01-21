@@ -1,12 +1,15 @@
 package api
 
-import "net/http"
+import "context"
 
 // TODO: mock for unit tests
 type EnergyConsumptionControllerInterface interface {
-	ServerInterface
+	StrictServerInterface
 }
 
 type EnergyConsumptionController struct{}
 
-func (EnergyConsumptionController) GetConsumption(w http.ResponseWriter, r *http.Request, params GetConsumptionParams)
+func (EnergyConsumptionController) GetConsumption(ctx context.Context, request GetConsumptionRequestObject) (GetConsumptionResponseObject, error) {
+	// TODO: implement
+	return nil, nil
+}
