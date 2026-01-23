@@ -4,3 +4,4 @@ output-options:
   skip-prune: true
 generate:
   models: true
+  embedded-spec: true

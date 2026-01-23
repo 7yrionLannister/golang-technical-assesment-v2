@@ -58,6 +58,10 @@ paths:
           required: true
           schema:
             type: string
+            enum:
+              - monthly
+              - weekly
+              - daily
       responses:
         '200':
           description: Successful operation

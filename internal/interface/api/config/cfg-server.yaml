@@ -6,5 +6,6 @@ generate:
   models: true
   std-http-server: true
   strict-server: true
+  embedded-spec: true
 import-mapping:
   ./models.yaml: "github.com/7yrionLannister/golang-technical-assesment-v2/internal/domain/dto"
