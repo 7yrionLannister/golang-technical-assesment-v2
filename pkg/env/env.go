@@ -11,6 +11,7 @@ import (
 
 // [Environment] is a struct that defines the environment variables that the application needs.
 type Environment struct {
+	ServerPort       string `env:"PORT,required"`
 	DataBaseHost     string `env:"DB_HOST,required"`
 	DataBaseEngine   string `env:"DB_ENGINE,required"`
 	DataBaseUser     string `env:"DB_USER,required"`
