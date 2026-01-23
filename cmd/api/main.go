@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	builtinlog "log"
 	"net"
 	"net/http"
@@ -10,8 +11,6 @@ import (
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/db"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/env"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/log"
-
-	middleware "github.com/oapi-codegen/nethttp-middleware"
 )
 
 // "context"
@@ -58,15 +57,19 @@ func main() {
 
 	r := http.NewServeMux()
 
+	swaggerJSON, _ := json.Marshal(swagger)
+
+	r.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(swaggerJSON)
+	})
+
 	// register our strictServer above as the handler for the interface
 	api.HandlerFromMux(strictServer, r)
 
-	// Use our validation middleware to check all requests against the
-	// OpenAPI schema.
-	h := middleware.OapiRequestValidator(swagger)(r)
-
 	s := &http.Server{
-		Handler: h,
+		Handler: r,
 		Addr:    net.JoinHostPort("0.0.0.0", env.Env.ServerPort),
 	}
 
