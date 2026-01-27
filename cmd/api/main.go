@@ -1,29 +1,17 @@
 package main
 
 import (
-	"encoding/json"
 	builtinlog "log"
 	"net"
 	"net/http"
 	"os"
 
 	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/api"
+	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/middleware"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/db"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/env"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/log"
 )
-
-// "context"
-// "os"
-// "os/signal"
-// "syscall"
-
-// messagingRouter "github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/messaging/router"
-// "github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/middleware"
-// webRouter "github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/router"
-// "github.com/7yrionLannister/golang-technical-assesment-v2/pkg/config"
-// "github.com/7yrionLannister/golang-technical-assesment-v2/pkg/log"
-// "github.com/7yrionLannister/golang-technical-assesment-v2/pkg/util"
 
 func main() {
 	// Load environment variables
@@ -57,19 +45,13 @@ func main() {
 
 	r := http.NewServeMux()
 
-	swaggerJSON, _ := json.Marshal(swagger)
-
-	r.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(swaggerJSON)
-	})
+	validator := middleware.ValidatorMiddleware(swagger)
 
 	// register our strictServer above as the handler for the interface
 	api.HandlerFromMux(strictServer, r)
 
 	s := &http.Server{
-		Handler: r,
+		Handler: validator(r),
 		Addr:    net.JoinHostPort("0.0.0.0", env.Env.ServerPort),
 	}
 

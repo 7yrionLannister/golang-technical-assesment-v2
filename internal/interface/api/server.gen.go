@@ -58,6 +58,9 @@ type ServerInterface interface {
 	// Get consumption report.
 	// (GET /consumption)
 	GetConsumption(w http.ResponseWriter, r *http.Request, params GetConsumptionParams)
+	// Get OpenAPI specification
+	// (GET /swagger.json)
+	GetOpenapi(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -145,6 +148,20 @@ func (siw *ServerInterfaceWrapper) GetConsumption(w http.ResponseWriter, r *http
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetConsumption(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetOpenapi operation middleware
+func (siw *ServerInterfaceWrapper) GetOpenapi(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetOpenapi(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -275,6 +292,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc("GET "+options.BaseURL+"/consumption", wrapper.GetConsumption)
+	m.HandleFunc("GET "+options.BaseURL+"/swagger.json", wrapper.GetOpenapi)
 
 	return m
 }
@@ -314,11 +332,30 @@ func (response GetConsumption500JSONResponse) VisitGetConsumptionResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetOpenapiRequestObject struct {
+}
+
+type GetOpenapiResponseObject interface {
+	VisitGetOpenapiResponse(w http.ResponseWriter) error
+}
+
+type GetOpenapi200JSONResponse map[string]interface{}
+
+func (response GetOpenapi200JSONResponse) VisitGetOpenapiResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Get consumption report.
 	// (GET /consumption)
 	GetConsumption(ctx context.Context, request GetConsumptionRequestObject) (GetConsumptionResponseObject, error)
+	// Get OpenAPI specification
+	// (GET /swagger.json)
+	GetOpenapi(ctx context.Context, request GetOpenapiRequestObject) (GetOpenapiResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -376,26 +413,51 @@ func (sh *strictHandler) GetConsumption(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
+// GetOpenapi operation middleware
+func (sh *strictHandler) GetOpenapi(w http.ResponseWriter, r *http.Request) {
+	var request GetOpenapiRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetOpenapi(ctx, request.(GetOpenapiRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetOpenapi")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetOpenapiResponseObject); ok {
+		if err := validResponse.VisitGetOpenapiResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

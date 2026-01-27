@@ -83,7 +83,18 @@ paths:
                 $ref: "./models.yaml#/components/schemas/Error"
       security:
         - bearer_auth: []
-
+  /swagger.json:
+    get:
+      summary: Get OpenAPI specification
+      description: Returns the OpenAPI specification file.
+      operationId: getOpenapi
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
 components:
   securitySchemes:
     bearer_auth:
