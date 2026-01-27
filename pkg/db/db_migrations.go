@@ -25,7 +25,7 @@ func MigrateUp() error {
 
 	// Run migrations with golang-migrate
 	m, err := migrate.New(
-		"file://./config/db.migrations",
+		"file://./../../pkg/config/db.migrations",
 		env.Env.DataBaseUrl,
 	)
 	if err != nil {
