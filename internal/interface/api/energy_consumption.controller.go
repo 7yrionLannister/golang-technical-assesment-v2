@@ -33,6 +33,9 @@ func (EnergyConsumptionController) GetOpenapi(ctx context.Context, request GetOp
 		log.L.Error("Failed to turn spec into json")
 	}
 	v := &map[string]any{}
-	json.Unmarshal(swaggerJSON, v)
+	err = json.Unmarshal(swaggerJSON, v)
+	if err != nil {
+		log.L.Error("Failed to unmarshall swagger")
+	}
 	return GetOpenapi200JSONResponse(*v), nil
 }

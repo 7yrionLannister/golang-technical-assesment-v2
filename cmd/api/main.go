@@ -30,6 +30,18 @@ func main() {
 	}
 	log.L.Debug("Initialized application")
 
+	// Start DB
+	db.DB = new(db.GormDatabase)
+	err = db.DB.InitDatabaseConnection()
+	if err != nil {
+		log.L.Error("Error initializing database connection", "error", err)
+		os.Exit(1)
+	}
+	err = db.ImportTestData()
+	if err != nil {
+		log.L.Warn("Error importing test data", "error", err)
+	}
+
 	swagger, err := api.GetSwagger()
 	if err != nil {
 		log.L.Error("Failed to load swagger spec")
