@@ -21,6 +21,8 @@ var gormConfig = &gorm.Config{
 }
 
 // Database abstraction
+//
+//go:generate go tool counterfeiter . Database
 type Database interface {
 	Select(query string, args ...any) Database      // Add a select clause to the query
 	Model(value any) Database                       // Specify a model to the query

@@ -8,26 +8,25 @@ import (
 
 	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/domain/view"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/db"
+	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/db/dbfakes"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/env"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/log"
-	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/test"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-var mockDB *test.MockDatabase
+var mockDB *dbfakes.FakeDatabase
 
 // Initialize the mock database and the log.L.
 func TestMain(m *testing.M) {
 	log.L.InitLogger(env.Env.LogLevel)
-	db.DB = new(test.MockDatabase)
+	db.DB = new(dbfakes.FakeDatabase)
 	db.DB.InitDatabaseConnection()
-	mockDB = db.DB.(*test.MockDatabase)
+	mockDB = db.DB.(*dbfakes.FakeDatabase)
 
-	mockDB.On("Model", mock.Anything).Return(mockDB)
-	mockDB.On("Select", mock.Anything, mock.Anything).Return(mockDB)
-	mockDB.On("Where", mock.Anything, mock.Anything).Return(mockDB)
-	mockDB.On("Group", mock.Anything).Return(mockDB)
+	mockDB.ModelReturns(mockDB)
+	mockDB.SelectReturns(mockDB)
+	mockDB.WhereReturns(mockDB)
+	mockDB.GroupReturns(mockDB)
 
 	code := m.Run()
 	os.Exit(code)
@@ -45,14 +44,12 @@ func TestGetEnergyConsumptionsByMeterIdBetweenDates_Success(t *testing.T) {
 	}
 
 	// When
-	mockDB.On("Scan", mock.Anything).
-		// Then
-		Return(expectedData, nil)
-		// When
-	mockDB.On("Error").
-		// Then
-		Return(nil).
-		Once()
+	mockDB.ScanStub = func(a any) db.Database {
+		aPointer := a.(*[]view.EnergyConsumption)
+		*aPointer = expectedData
+		return mockDB
+	}
+	mockDB.ErrorReturns(nil)
 
 	// Test
 	repo := EnergyConsumptionRepository{}
@@ -61,7 +58,6 @@ func TestGetEnergyConsumptionsByMeterIdBetweenDates_Success(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 	assert.Equal(t, expectedData, result)
-	mockDB.AssertExpectations(t)
 }
 
 func TestGetEnergyConsumptionsByMeterIdBetweenDates_Error(t *testing.T) {
@@ -74,13 +70,8 @@ func TestGetEnergyConsumptionsByMeterIdBetweenDates_Error(t *testing.T) {
 	expectedErr := errors.New("database error")
 
 	// When
-	mockDB.On("Error").
-		// Then
-		Return(expectedErr).
-		Once()
-	mockDB.On("Scan", mock.Anything).
-		// Then
-		Return(nil, expectedErr)
+	mockDB.ErrorReturns(expectedErr)
+	mockDB.ScanReturns(mockDB)
 
 	// Test
 	repo := EnergyConsumptionRepository{}
@@ -90,5 +81,4 @@ func TestGetEnergyConsumptionsByMeterIdBetweenDates_Error(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, result)
 	assert.Contains(t, err.Error(), "failed to query energy consumptions")
-	mockDB.AssertExpectations(t)
 }
