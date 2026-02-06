@@ -34,19 +34,19 @@ type Error struct {
 // PeriodicConsumption defines model for PeriodicConsumption.
 type PeriodicConsumption struct {
 	DataGraph []EnergyConsumption `json:"data_graph"`
-	Period    string              `json:"period"`
+	Period    []string            `json:"period"`
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/3xSS2sbMRD+K2La4xY7Li3u3kLIJVDIvYQwlsa7U1aPjkZtTfB/L1KM19hLb9I8vsfM",
-	"vIGNPsVAQTP0b5DtSB7b8zGQDIeHGHLxSTmGGkwSE4kytRK0yr+pvhxlK3wqg/sWN9QQjG0Q5KADVvKt",
-	"cx/Fo0IP+ymiQgd6SAQ9hOJ3JHA8B1AED/WPzgnlvED2njB/RhIyOpLxpCSGs5miRW3E9Bd9mqrqH3C3",
-	"3m7X5jtOvCvmOXLQ7vTrzMO9+bbefP0CL2cFWYXDUCU03Fd2VcMF4N1LN/spHHQ7++GgNFRDxw6EfhUW",
-	"clXDaXKzrQv0mTrufpLVSv0oEuV2ATa6Nv4FqTnjsJS7EtIQ5vol7mcSjo7tf0/BoeLrIJjG+jvv+aPQ",
-	"Hnr4sJrPbHW6sdXtgS2sPTXyq4nDUwlkNuvNZ/PJPJXp0N4LO7syeyHyjHzruHZx2EfoQ5mmDmKigImh",
-	"h9qFOub3zPFfAAAA///z/9hDPQMAAA==",
+	"H4sIAAAAAAAC/3xSTYsbMQz9K0btcZZkU1rSuYVlLwuFvS9hcWxlRmX8UVluG0L+e7ETZtJk2JtsSe89",
+	"PekIJrgYPHpJ0B4hmR6druGzR+4OT8Gn7KJQ8OUzcojIQlhLtBH6jSWymAzTpQw29V9hRVCmQqCFBkjQ",
+	"1c59YKcFWtgPQQs0IIeI0ILPbocMp/FDM+tDeWtrGVOaITsn1J8eGZX0qBwKsqKkhmC0VGL8q10ciuo3",
+	"eFyu10v1Qw+0y+o1kJfm8mrU00Z9X66+fYXtqCAJk++KhIr7TrZouAJ83DbTPJm8rKd5yAt2ZaBTA4y/",
+	"MjHaouHi3DTWFfpEHXY/0UihfmYOfL8AE2y1f0ZqSrqby90IqQhT/Rz3KzIFS+bDU7Ba9HvHOvblNe75",
+	"M+MeWvi0mM5scbmxxf2Bzaw9VvIbx9/gJXtUq+Xqi3pQL3k41BgaGGP1oDa5y0nOme326vju3Pqf9Mah",
+	"q8lGOfc2lS7y+wCtz8PQQIjodSRooXRp6dM5c/oXAAD//2LqOpNyAwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

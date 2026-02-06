@@ -10,14 +10,16 @@ import (
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/util"
 )
 
-// TODO: mock for unit tests
+//go:generate go tool counterfeiter . EnergyConsumptionRepositoryInterface
 type EnergyConsumptionRepositoryInterface interface {
 	GetEnergyConsumptionsByMeterIdBetweenDates(metersIds []uint8, startDate time.Time, endDate time.Time) ([]view.EnergyConsumption, error)
 }
 
-type EnergyConsumptionRepository struct{}
+type EnergyConsumptionRepository struct {
+	// TODO: put db here instead of accessing it via package
+}
 
-func (EnergyConsumptionRepository) GetEnergyConsumptionsByMeterIdBetweenDates(metersIds []uint8, startDate time.Time, endDate time.Time) ([]view.EnergyConsumption, error) {
+func (*EnergyConsumptionRepository) GetEnergyConsumptionsByMeterIdBetweenDates(metersIds []uint8, startDate time.Time, endDate time.Time) ([]view.EnergyConsumption, error) {
 	var result []view.EnergyConsumption
 	err := db.DB.
 		Model(&model.EnergyConsumption{}).

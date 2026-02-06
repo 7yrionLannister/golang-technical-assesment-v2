@@ -1,5 +1,4 @@
 openapi: 3.1.0
-# TODO: split into multiple files: parameters.yaml, models.yaml, etc
 info:
   title: Energy Consumption API
   description: |-

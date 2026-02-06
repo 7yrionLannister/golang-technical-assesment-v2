@@ -28,8 +28,10 @@ components:
       type: object
       properties:
         period:
-          type: string
-          examples: ["June 2023 - July 2023"]
+          type: array
+          items:
+            type: string
+          examples: [["June 2023 - July 2023", "July 2023 - August 2023"]]
         data_graph:
           type: array
           items:
