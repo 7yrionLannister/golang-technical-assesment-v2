@@ -25,9 +25,7 @@ func (*EnergyConsumptionRepository) GetEnergyConsumptionsByMeterIdBetweenDates(m
 		Model(&model.EnergyConsumption{}).
 		Select("device_id as meter_id, sum(consumption) as total_consumption").
 		Where("device_id IN ? AND created_at BETWEEN ? AND ?", metersIds, startDate, endDate).
-		Group("device_id").
-		Scan(&result).
-		Error()
+		Group("device_id").Scan(&result).Error()
 	if err != nil {
 		return nil, util.HandleError(err, "Failed to query energy consumptions")
 	}

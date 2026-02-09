@@ -25,8 +25,6 @@ This will start the application on `localhost:8181`.
 
 You can check [the API specification file](./internal/interface/Api/spec/openapi.yaml) to know how to interact with the API.
 
-<!-- TODO also serve the docs at localhost:8181/docs-->
-
 ## Testing
 
 Run the tests using:

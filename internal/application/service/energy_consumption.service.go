@@ -5,7 +5,6 @@ import (
 
 	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/application/repository"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/domain/dto"
-	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/api"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/util"
 	"github.com/go-faker/faker/v4"
 )
@@ -19,7 +18,13 @@ type EnergyConsumptionService struct {
 	repo repository.EnergyConsumptionRepositoryInterface
 }
 
-func (svc *EnergyConsumptionService) GetEnergyConsumptions(metersIds []uint8, startDate time.Time, endDate time.Time, kindPeriod api.GetConsumptionParamsPeriod) (*dto.PeriodicConsumption, error) {
+func NewEnergyConsumptionService(repo repository.EnergyConsumptionRepositoryInterface) *EnergyConsumptionService {
+	return &EnergyConsumptionService{
+		repo: repo,
+	}
+}
+
+func (svc *EnergyConsumptionService) GetEnergyConsumptions(metersIds []uint8, startDate time.Time, endDate time.Time, kindPeriod string) (*dto.PeriodicConsumption, error) {
 	var periodDto = &dto.PeriodicConsumption{
 		Period:    make([]string, 0),
 		DataGraph: make([]dto.EnergyConsumption, 0),
@@ -33,7 +38,7 @@ func (svc *EnergyConsumptionService) GetEnergyConsumptions(metersIds []uint8, st
 
 // Iterates through the period between startDate and endDate, incrementing the date by the kindPeriod to find the sub-periods.
 // For each sub-period, it computes the energy consumption for each meter in the metersIds slice.
-func (svc *EnergyConsumptionService) stepThroughPeriod(periodDto *dto.PeriodicConsumption, metersIds []uint8, startDate time.Time, endDate time.Time, kindPeriod api.GetConsumptionParamsPeriod) error {
+func (svc *EnergyConsumptionService) stepThroughPeriod(periodDto *dto.PeriodicConsumption, metersIds []uint8, startDate time.Time, endDate time.Time, kindPeriod string) error {
 	// map to keep track of the *dto.EnergyConsumptionDTO that is part of the DataGraph
 	energyConsumptionDTOForMeter := make(map[uint8]*dto.EnergyConsumption)
 	for startDate.Before(endDate) {
@@ -42,7 +47,7 @@ func (svc *EnergyConsumptionService) stepThroughPeriod(periodDto *dto.PeriodicCo
 		if periodEndDate.After(endDate) {
 			periodEndDate = endDate
 		}
-		err := svc.populateDataGraphForPeriod(periodDto, metersIds, energyConsumptionDTOForMeter, startDate, periodEndDate)
+		err := svc.populateDataGraphForPeriod(metersIds, energyConsumptionDTOForMeter, startDate, periodEndDate)
 		if err != nil {
 			return err
 		}
@@ -56,14 +61,14 @@ func (svc *EnergyConsumptionService) stepThroughPeriod(periodDto *dto.PeriodicCo
 
 // Increments the date by the kindPeriod.
 // Gets the period string for the kindPeriod.
-func stepDateAndGetPeriodString(kindPeriod api.GetConsumptionParamsPeriod, initialDate time.Time) (newDate time.Time, periodString string) {
+func stepDateAndGetPeriodString(kindPeriod string, initialDate time.Time) (newDate time.Time, periodString string) {
 	switch kindPeriod {
-	case api.Daily:
+	case "daily":
 		return initialDate.AddDate(0, 0, 1), initialDate.Format("January 2") // TODO format as "JAN 2"
-	case api.Weekly:
+	case "weekly":
 		periodString = initialDate.Format("January 2") + " - " + initialDate.AddDate(0, 0, 6).Format("January 2") // TODO format as "JAN 2 - JAN 2"
 		return initialDate.AddDate(0, 0, 7), periodString
-	case api.Monthly:
+	case "monthly":
 		return initialDate.AddDate(0, 1, 0), initialDate.Format("January 2006") // TODO format as "JAN 2006"
 	default:
 		return initialDate, "TODO"
@@ -71,7 +76,7 @@ func stepDateAndGetPeriodString(kindPeriod api.GetConsumptionParamsPeriod, initi
 }
 
 // Queries the energy consumption for each meter in the metersIds slice for the period between periodStartDate and periodEndDate
-func (svc *EnergyConsumptionService) populateDataGraphForPeriod(periodDto *dto.PeriodicConsumption, metersIds []uint8, energyConsumptionDTOForMeter map[uint8]*dto.EnergyConsumption, periodStartDate time.Time, periodEndDate time.Time) error {
+func (svc *EnergyConsumptionService) populateDataGraphForPeriod(metersIds []uint8, energyConsumptionDTOForMeter map[uint8]*dto.EnergyConsumption, periodStartDate time.Time, periodEndDate time.Time) error {
 	energyConsumptions, err := svc.repo.GetEnergyConsumptionsByMeterIdBetweenDates(metersIds, periodStartDate, periodEndDate)
 	if err != nil {
 		return util.HandleError(err, "Failed to fetch energy consumptions")

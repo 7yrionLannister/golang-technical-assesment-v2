@@ -17,7 +17,7 @@ import (
 )
 
 var mockRepo *repositoryfakes.FakeEnergyConsumptionRepositoryInterface
-var service EnergyConsumptionService
+var service *EnergyConsumptionService
 
 var expectedResult = []dto.EnergyConsumption{
 	{MeterId: 0, Active: []float32{1, 0}},
@@ -27,9 +27,7 @@ var expectedResult = []dto.EnergyConsumption{
 func TestMain(m *testing.M) {
 	log.L.InitLogger(env.Env.LogLevel)
 	mockRepo = new(repositoryfakes.FakeEnergyConsumptionRepositoryInterface)
-	service = EnergyConsumptionService{
-		repo: mockRepo,
-	}
+	service = NewEnergyConsumptionService(mockRepo)
 
 	code := m.Run()
 	os.Exit(code)

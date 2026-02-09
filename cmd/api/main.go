@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/application/repository"
+	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/application/service"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/api"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/middleware"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/db"
@@ -51,8 +53,9 @@ func main() {
 	// Clear out the servers array in the swagger spec, that skips validating
 	// that server names match. We don't know how this thing will be run.
 	swagger.Servers = nil
-
-	consumptionApi := api.NewEnergyConsumptionController()
+	consumptionRepo := &repository.EnergyConsumptionRepository{} // TODO: use constructor
+	consumptionService := service.NewEnergyConsumptionService(consumptionRepo)
+	consumptionApi := api.NewEnergyConsumptionController(consumptionService)
 	strictServer := api.NewStrictHandler(consumptionApi, nil)
 
 	r := http.NewServeMux()
