@@ -40,8 +40,8 @@ func ImportTestData() error {
 		createdAt, _ := time.Parse("2006-01-02 15:04:05+00", record[3])
 		energyConsumptions = append(energyConsumptions, model.EnergyConsumption{
 			Id:          uuid.MustParse(record[0]),
-			DeviceId:    uint(deviceId),
-			Consumption: consumption,
+			DeviceId:    uint8(deviceId),
+			Consumption: float32(consumption),
 			CreatedAt:   createdAt,
 		})
 	}
