@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	builtinlog "log"
 	"net"
 	"net/http"
@@ -54,17 +55,31 @@ func main() {
 	swagger.Servers = nil
 	consumptionRepo := repository.NewEnergyConsumptionRepository(DB)
 	consumptionApi := api.NewEnergyConsumptionService(consumptionRepo)
-	strictServer := api.NewStrictHandler(consumptionApi, nil)
+	strictServer := api.NewStrictHandlerWithOptions(consumptionApi, nil, api.StrictHTTPServerOptions{
+		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+			unexpectedResponse := api.GetConsumption400JSONResponse{
+				// TODO manage error (500 and 400)
+				Code:    "A501",
+				Message: "Unexpected error",
+			}
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			body, _ := json.Marshal(unexpectedResponse)
+			w.Write(body)
+		},
+	})
 
 	r := http.NewServeMux()
 
+	// set up middlewares
 	validator := middleware.ValidatorMiddleware(swagger)
+	logger := middleware.LoggingMiddleware(validator(r))
 
 	// register our strictServer above as the handler for the interface
 	api.HandlerFromMux(strictServer, r)
 
 	s := &http.Server{
-		Handler: validator(r),
+		Handler: logger,
 		Addr:    net.JoinHostPort("0.0.0.0", env.Env.ServerPort),
 	}
 

@@ -12,7 +12,6 @@ import (
 	"github.com/go-faker/faker/v4"
 )
 
-// TODO: mock for unit tests
 type EnergyConsumptionServiceInterface interface {
 	StrictServerInterface
 }
@@ -34,11 +33,7 @@ func (svc *EnergyConsumptionService) GetConsumption(ctx context.Context, request
 	}
 	err := svc.stepThroughPeriod(periodDto, request.Params.MeterId, request.Params.StartDate.Time, request.Params.EndDate.Time, request.Params.Period)
 	if err != nil {
-		return GetConsumption500JSONResponse{
-			// TODO manage error (500 and 400)
-			Code:    "A500",
-			Message: "TODO",
-		}, err
+		return nil, util.HandleError(err, "Unexpected error getting response")
 	}
 	return GetConsumption200JSONResponse(*periodDto), nil
 }
