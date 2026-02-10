@@ -18,7 +18,7 @@ const (
 )
 
 // Read data from test.csv and import it into the database
-func ImportTestData() error {
+func (gDB *GormDatabase) ImportTestData() error {
 	// Read data from file
 	log.L.Debug("Importing data from file")
 	file, err := os.Open(dataFile)
@@ -47,7 +47,7 @@ func ImportTestData() error {
 	}
 	// Batch insert for efficiency
 
-	err = DB.CreateInBatches(energyConsumptions, batchSize)
+	err = gDB.CreateInBatches(energyConsumptions, batchSize)
 	if err != nil {
 		return util.HandleError(err, "Failed to create in batches")
 	}

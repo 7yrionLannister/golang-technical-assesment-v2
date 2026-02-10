@@ -32,13 +32,13 @@ func main() {
 	log.L.Debug("Initialized application")
 
 	// Start DB
-	db.DB = new(db.GormDatabase)
-	err = db.DB.InitDatabaseConnection()
+	DB := new(db.GormDatabase)
+	err = DB.InitDatabaseConnection()
 	if err != nil {
 		log.L.Error("Error initializing database connection", "error", err)
 		os.Exit(1)
 	}
-	err = db.ImportTestData()
+	err = DB.ImportTestData()
 	if err != nil {
 		log.L.Warn("Error importing test data", "error", err)
 	}
@@ -52,7 +52,7 @@ func main() {
 	// Clear out the servers array in the swagger spec, that skips validating
 	// that server names match. We don't know how this thing will be run.
 	swagger.Servers = nil
-	consumptionRepo := &repository.EnergyConsumptionRepository{} // TODO: use constructor
+	consumptionRepo := repository.NewEnergyConsumptionRepository(DB)
 	consumptionApi := api.NewEnergyConsumptionService(consumptionRepo)
 	strictServer := api.NewStrictHandler(consumptionApi, nil)
 

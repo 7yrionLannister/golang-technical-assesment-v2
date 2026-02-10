@@ -21,7 +21,7 @@ type EnergyConsumptionService struct {
 	repo repository.EnergyConsumptionRepositoryInterface
 }
 
-func NewEnergyConsumptionService(repo repository.EnergyConsumptionRepositoryInterface) *EnergyConsumptionService {
+func NewEnergyConsumptionService(repo repository.EnergyConsumptionRepositoryInterface) EnergyConsumptionServiceInterface {
 	return &EnergyConsumptionService{
 		repo: repo,
 	}

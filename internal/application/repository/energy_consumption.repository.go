@@ -16,12 +16,18 @@ type EnergyConsumptionRepositoryInterface interface {
 }
 
 type EnergyConsumptionRepository struct {
-	// TODO: put db here instead of accessing it via package
+	DB db.Database
 }
 
-func (*EnergyConsumptionRepository) GetEnergyConsumptionsByMeterIdBetweenDates(metersIds []uint8, startDate time.Time, endDate time.Time) ([]view.EnergyConsumption, error) {
+func NewEnergyConsumptionRepository(DB db.Database) EnergyConsumptionRepositoryInterface {
+	return &EnergyConsumptionRepository{
+		DB: DB,
+	}
+}
+
+func (repo *EnergyConsumptionRepository) GetEnergyConsumptionsByMeterIdBetweenDates(metersIds []uint8, startDate time.Time, endDate time.Time) ([]view.EnergyConsumption, error) {
 	var result []view.EnergyConsumption
-	err := db.DB.
+	err := repo.DB.
 		Model(&model.EnergyConsumption{}).
 		Select("device_id as meter_id, sum(consumption) as total_consumption").
 		Where("device_id IN (?) AND created_at BETWEEN ? AND ?", metersIds, startDate, endDate).

@@ -17,8 +17,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var mockRepo *repositoryfakes.FakeEnergyConsumptionRepositoryInterface
-var controller *EnergyConsumptionService
+var (
+	mockRepo   *repositoryfakes.FakeEnergyConsumptionRepositoryInterface
+	controller EnergyConsumptionServiceInterface
+)
 
 var expectedResult = []dto.EnergyConsumption{
 	{MeterId: 0, Active: []float32{1, 0}},

@@ -14,19 +14,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var mockDB *dbfakes.FakeDatabase
+var (
+	mockDB *dbfakes.FakeDatabase
+	repo   EnergyConsumptionRepositoryInterface
+)
 
 // Initialize the mock database and the log.L.
 func TestMain(m *testing.M) {
 	log.L.InitLogger(env.Env.LogLevel)
-	db.DB = new(dbfakes.FakeDatabase)
-	db.DB.InitDatabaseConnection()
-	mockDB = db.DB.(*dbfakes.FakeDatabase)
+	mockDB = new(dbfakes.FakeDatabase)
+	// mockDB.InitDatabaseConnection()
 
 	mockDB.ModelReturns(mockDB)
 	mockDB.SelectReturns(mockDB)
 	mockDB.WhereReturns(mockDB)
 	mockDB.GroupReturns(mockDB)
+
+	repo = NewEnergyConsumptionRepository(mockDB)
 
 	code := m.Run()
 	os.Exit(code)
@@ -52,7 +56,6 @@ func TestGetEnergyConsumptionsByMeterIdBetweenDates_Success(t *testing.T) {
 	mockDB.ErrorReturns(nil)
 
 	// Test
-	repo := EnergyConsumptionRepository{}
 	result, err := repo.GetEnergyConsumptionsByMeterIdBetweenDates([]uint8{meterId}, startDate, endDate)
 
 	// Assert
@@ -74,7 +77,6 @@ func TestGetEnergyConsumptionsByMeterIdBetweenDates_Error(t *testing.T) {
 	mockDB.ScanReturns(mockDB)
 
 	// Test
-	repo := EnergyConsumptionRepository{}
 	result, err := repo.GetEnergyConsumptionsByMeterIdBetweenDates([]uint8{meterId}, startDate, endDate)
 
 	// Assert

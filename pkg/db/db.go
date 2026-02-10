@@ -30,51 +30,47 @@ type Database interface {
 	Group(query string) Database                    // Add a group by clause to the query
 	Where(query string, args ...any) Database       // Add a where clause to the query
 	Error() error                                   // Returns the last error that occurred
-	InitDatabaseConnection() error                  // Setup global database connection
+	InitDatabaseConnection() error                  // Setup global database connection. Call once at the beggining of the application to initialize the connection.
 	Find(out any, args ...any) Database             // Find records that match the conditions
 	CreateInBatches(value any, batchSize int) error // Create records in batches
 }
 
 // Specific implementation of the Database interface using gorm
 type GormDatabase struct {
-	GormDb *gorm.DB
+	gormDb *gorm.DB
 }
 
 func (g *GormDatabase) Error() error {
-	return g.GormDb.Error
+	return g.gormDb.Error
 }
 
 func (g *GormDatabase) Model(value any) Database {
-	return &GormDatabase{g.GormDb.Model(value)}
+	return &GormDatabase{g.gormDb.Model(value)}
 }
 
 func (g *GormDatabase) Select(query string, args ...any) Database {
-	return &GormDatabase{g.GormDb.Select(query, args...)}
+	return &GormDatabase{g.gormDb.Select(query, args...)}
 }
 
 func (g *GormDatabase) Where(query string, args ...any) Database {
-	return &GormDatabase{g.GormDb.Where(query, args...)}
+	return &GormDatabase{g.gormDb.Where(query, args...)}
 }
 
 func (g *GormDatabase) Find(out any, conds ...any) Database {
-	return &GormDatabase{g.GormDb.Find(out, conds...)}
+	return &GormDatabase{g.gormDb.Find(out, conds...)}
 }
 
 func (g *GormDatabase) Scan(dest any) Database {
-	return &GormDatabase{g.GormDb.Scan(dest)}
+	return &GormDatabase{g.gormDb.Scan(dest)}
 }
 
 func (g *GormDatabase) Group(query string) Database {
-	return &GormDatabase{g.GormDb.Group(query)}
+	return &GormDatabase{g.gormDb.Group(query)}
 }
 
 func (g *GormDatabase) CreateInBatches(value any, batchSize int) error {
-	return g.GormDb.CreateInBatches(value, batchSize).Error
+	return g.gormDb.CreateInBatches(value, batchSize).Error
 }
-
-// Global database connection.
-// Call [InitDatabaseConnection] once at the beggining of the application to initialize the connection.
-var DB Database
 
 func (g *GormDatabase) InitDatabaseConnection() error {
 	// Connect gorm to database
@@ -86,7 +82,7 @@ func (g *GormDatabase) InitDatabaseConnection() error {
 	if err != nil {
 		return util.HandleError(err, "Failed to connect to database")
 	}
-	g.GormDb = db
+	g.gormDb = db
 	log.L.Debug("Connected to database")
 	return nil
 }
