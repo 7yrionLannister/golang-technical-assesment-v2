@@ -1,4 +1,4 @@
-package service
+package api
 
 import (
 	"errors"
@@ -13,11 +13,12 @@ import (
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/env"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/log"
 	"github.com/go-faker/faker/v4"
+	"github.com/oapi-codegen/runtime/types"
 	"github.com/stretchr/testify/assert"
 )
 
 var mockRepo *repositoryfakes.FakeEnergyConsumptionRepositoryInterface
-var service *EnergyConsumptionService
+var controller *EnergyConsumptionService
 
 var expectedResult = []dto.EnergyConsumption{
 	{MeterId: 0, Active: []float32{1, 0}},
@@ -27,7 +28,7 @@ var expectedResult = []dto.EnergyConsumption{
 func TestMain(m *testing.M) {
 	log.L.InitLogger(env.Env.LogLevel)
 	mockRepo = new(repositoryfakes.FakeEnergyConsumptionRepositoryInterface)
-	service = NewEnergyConsumptionService(mockRepo)
+	controller = NewEnergyConsumptionService(mockRepo)
 
 	code := m.Run()
 	os.Exit(code)
@@ -60,10 +61,19 @@ func TestGetEnergyConsumptionsMonthly_Success(t *testing.T) {
 	mockForPeriods(metersIds)
 
 	// Test
-	result, err := service.GetEnergyConsumptions(metersIds, startDate, endDate, "monthly")
+	res, err := controller.GetConsumption(t.Context(), GetConsumptionRequestObject{
+		Params: GetConsumptionParams{
+			MeterId:   metersIds,
+			StartDate: types.Date{Time: startDate},
+			EndDate:   types.Date{Time: endDate},
+			Period:    Monthly,
+		},
+	})
 
 	// Assert
 	assert.NoError(t, err)
+	result, ok := res.(GetConsumption200JSONResponse)
+	assert.True(t, ok, "Conversion to 200 response failed")
 	assert.Len(t, result.DataGraph, 2)
 	assert.Condition(t, func() bool {
 		for index, expected := range expectedResult {
@@ -90,11 +100,19 @@ func TestGetEnergyConsumptionsWeekly_Success(t *testing.T) {
 	mockForPeriods(metersIds)
 
 	// Test
-	result, err := service.GetEnergyConsumptions(metersIds, startDate, endDate, "weekly")
+	res, err := controller.GetConsumption(t.Context(), GetConsumptionRequestObject{
+		Params: GetConsumptionParams{
+			MeterId:   metersIds,
+			StartDate: types.Date{Time: startDate},
+			EndDate:   types.Date{Time: endDate},
+			Period:    Weekly,
+		},
+	})
 
 	// Assert
 	assert.NoError(t, err)
-	assert.Len(t, result.DataGraph, 2)
+	result, ok := res.(GetConsumption200JSONResponse)
+	assert.True(t, ok, "Conversion to 200 response failed")
 	assert.Condition(t, func() bool {
 		for index, expected := range expectedResult {
 			actual := result.DataGraph[index]
@@ -117,23 +135,22 @@ func TestGetEnergyConsumptionsDaily_Success(t *testing.T) {
 	endDate, _ := time.Parse("2006-01-02", "2025-07-03")
 
 	// Expect
-	// Database state
-	data := make([]view.EnergyConsumption, 4)
-	for i := range 4 {
-		data[i] = view.EnergyConsumption{
-			MeterId:          metersIds[i%2],
-			Address:          faker.GetRealAddress().Address,
-			TotalConsumption: float32(i*10 + 1),
-		}
-	}
-
 	mockForPeriods(metersIds)
 
 	// Test
-	result, err := service.GetEnergyConsumptions(metersIds, startDate, endDate, "daily")
+	res, err := controller.GetConsumption(t.Context(), GetConsumptionRequestObject{
+		Params: GetConsumptionParams{
+			MeterId:   metersIds,
+			StartDate: types.Date{Time: startDate},
+			EndDate:   types.Date{Time: endDate},
+			Period:    Daily,
+		},
+	})
 
 	// Assert
 	assert.NoError(t, err)
+	result, ok := res.(GetConsumption200JSONResponse)
+	assert.True(t, ok, "Conversion to 200 response failed")
 	assert.Len(t, result.DataGraph, 2)
 	assert.Condition(t, func() bool {
 		for index, expected := range expectedResult {
@@ -163,10 +180,19 @@ func TestGetEnergyConsumptionsMonthly_Error(t *testing.T) {
 	mockRepo.GetEnergyConsumptionsByMeterIdBetweenDatesReturns(nil, expectedErr)
 
 	// Test
-	result, err := service.GetEnergyConsumptions(metersIds, startDate, endDate, "monthly")
+	res, err := controller.GetConsumption(t.Context(), GetConsumptionRequestObject{
+		Params: GetConsumptionParams{
+			MeterId:   metersIds,
+			StartDate: types.Date{Time: startDate},
+			EndDate:   types.Date{Time: endDate},
+			Period:    Monthly,
+		},
+	})
 
 	// Assert
-	assert.Nil(t, result)
+	result, ok := res.(GetConsumption500JSONResponse)
+	assert.True(t, ok, "Conversion to 500 response failed")
+	assert.Equal(t, "A500", result.Code)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "database error")
 }
@@ -185,10 +211,19 @@ func TestGetEnergyConsumptionsWeekly_Error(t *testing.T) {
 	mockRepo.GetEnergyConsumptionsByMeterIdBetweenDatesReturns(nil, expectedErr)
 
 	// Test
-	result, err := service.GetEnergyConsumptions(metersIds, startDate, endDate, "weekly")
+	res, err := controller.GetConsumption(t.Context(), GetConsumptionRequestObject{
+		Params: GetConsumptionParams{
+			MeterId:   metersIds,
+			StartDate: types.Date{Time: startDate},
+			EndDate:   types.Date{Time: endDate},
+			Period:    Weekly,
+		},
+	})
 
 	// Assert
-	assert.Nil(t, result)
+	result, ok := res.(GetConsumption500JSONResponse)
+	assert.True(t, ok, "Conversion to 500 response failed")
+	assert.Equal(t, "A500", result.Code)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "database error")
 }
@@ -207,10 +242,19 @@ func TestGetEnergyConsumptionsDaily_Error(t *testing.T) {
 	mockRepo.GetEnergyConsumptionsByMeterIdBetweenDatesReturns(nil, expectedErr)
 
 	// Test
-	result, err := service.GetEnergyConsumptions(metersIds, startDate, endDate, "daily")
+	res, err := controller.GetConsumption(t.Context(), GetConsumptionRequestObject{
+		Params: GetConsumptionParams{
+			MeterId:   metersIds,
+			StartDate: types.Date{Time: startDate},
+			EndDate:   types.Date{Time: endDate},
+			Period:    Daily,
+		},
+	})
 
 	// Assert
-	assert.Nil(t, result)
+	result, ok := res.(GetConsumption500JSONResponse)
+	assert.True(t, ok, "Conversion to 500 response failed")
+	assert.Equal(t, "A500", result.Code)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "database error")
 }

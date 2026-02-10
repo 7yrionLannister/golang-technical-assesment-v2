@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/application/repository"
-	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/application/service"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/api"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/internal/interface/middleware"
 	"github.com/7yrionLannister/golang-technical-assesment-v2/pkg/db"
@@ -54,8 +53,7 @@ func main() {
 	// that server names match. We don't know how this thing will be run.
 	swagger.Servers = nil
 	consumptionRepo := &repository.EnergyConsumptionRepository{} // TODO: use constructor
-	consumptionService := service.NewEnergyConsumptionService(consumptionRepo)
-	consumptionApi := api.NewEnergyConsumptionController(consumptionService)
+	consumptionApi := api.NewEnergyConsumptionService(consumptionRepo)
 	strictServer := api.NewStrictHandler(consumptionApi, nil)
 
 	r := http.NewServeMux()
