@@ -24,6 +24,7 @@ go run cmd/api/main.go
 This will start the application on `localhost:8181`.
 
 You can check [the API specification file](./internal/interface/Api/spec/openapi.yaml) to know how to interact with the API.
+Whenever you change the OpenAPI specification files or the interfaces mocked with counterfeiter you have to run the following command to have the generated code be up-to-date.
 
 ## Testing
 

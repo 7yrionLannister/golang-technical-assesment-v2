@@ -58,7 +58,6 @@ func main() {
 	strictServer := api.NewStrictHandlerWithOptions(consumptionApi, nil, api.StrictHTTPServerOptions{
 		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
 			unexpectedResponse := api.GetConsumption400JSONResponse{
-				// TODO manage error (500 and 400)
 				Code:    "A501",
 				Message: "Unexpected error",
 			}
