@@ -11,7 +11,7 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
-  - url: http:localhost:8081
+  - url: http:localhost:8181
 tags:
   - name: consumption
     description: Operations related to energy consumption.

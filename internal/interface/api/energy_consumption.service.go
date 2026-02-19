@@ -33,7 +33,11 @@ func (svc *EnergyConsumptionService) GetConsumption(ctx context.Context, request
 	}
 	err := svc.stepThroughPeriod(periodDto, request.Params.MeterId, request.Params.StartDate.Time, request.Params.EndDate.Time, request.Params.Period)
 	if err != nil {
-		return nil, util.HandleError(err, "Unexpected error getting response")
+		err = util.HandleError(err, "Unexpected error getting response")
+		return GetConsumption500JSONResponse{
+			Code:    "A500",
+			Message: "Unexpected error serving request: " + err.Error(),
+		}, err
 	}
 	return GetConsumption200JSONResponse(*periodDto), nil
 }

@@ -1,0 +1,37 @@
+version: '3.8'
+
+include:
+ - docker-compose.yml
+
+services:
+  consumption_api:
+    build: .
+    ports:
+      - "8181:8181"
+    environment:
+      PORT: 8181
+      DB_HOST: db
+      DB_USER: dev-user
+      DB_PASSWORD: dev-password
+      DB_NAME: meters
+      DB_ENGINE: postgresql
+      LOG_LEVEL: debug
+    depends_on:
+      - db
+    networks:
+      - consumption
+  k6:
+    image: grafana/k6:latest
+    command: run /test/script.js
+    volumes:
+      - ./k6/test:/test
+    environment:
+      BASE_URL: "http://consumption_api:8181"
+    depends_on:
+      - consumption_api
+    networks:
+      - consumption
+
+networks:
+  consumption:
+    driver: bridge

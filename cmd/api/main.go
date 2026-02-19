@@ -57,7 +57,7 @@ func main() {
 	consumptionApi := api.NewEnergyConsumptionService(consumptionRepo)
 	strictServer := api.NewStrictHandlerWithOptions(consumptionApi, nil, api.StrictHTTPServerOptions{
 		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
-			unexpectedResponse := api.GetConsumption400JSONResponse{
+			unexpectedResponse := api.GetConsumption500JSONResponse{
 				Code:    "A501",
 				Message: "Unexpected error",
 			}
@@ -82,5 +82,6 @@ func main() {
 		Addr:    net.JoinHostPort("0.0.0.0", env.Env.ServerPort),
 	}
 
+	log.L.Info("Server ready")
 	builtinlog.Fatal(s.ListenAndServe())
 }
